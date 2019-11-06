@@ -147,6 +147,13 @@ void ImprimeAliensPOSATUAL(t_listaAlien *listaAlien,int linha,int coluna,char **
 				mvwprintw(jogo , linha+4*p->posi_l+2 , coluna+7*p->posi_c , vetorS[tipo*6+5]);
 			}
 		}
+		if (p->estado == MORRENDO)
+		{
+			mvwprintw(jogo , linha+4*p->posi_l   , coluna+7*p->posi_c , "\\ | /");
+	                mvwprintw(jogo , linha+4*p->posi_l+1 , coluna+7*p->posi_c , "- 0 -");
+                        mvwprintw(jogo , linha+4*p->posi_l+2 , coluna+7*p->posi_c , "/ | \\");
+			p->estado = MORTO;
+		}
 		p = p->prox;
 	}
 	wrefresh(jogo);
@@ -159,52 +166,81 @@ void ImprimeJogador(int linhaJogador,int colunaJogador,WINDOW *jogo)
 	mvwprintw(jogo , linhaJogador+1 , colunaJogador-1 , spriteJ2);
 }
 
-void Verifica_Tiro(t_tiro *tiro,int linha_atual,int coluna_atual)
+int Verifica_Alien(int i,int j,t_listaAlien *listaAlien)
 {
-	if ((tiro->lin < linha_atual+20) && (tiro->lin >= linha_atual))
+	int k;
+	t_alien *p = listaAlien->ini->prox;
+	for ( k=0 ; k < i*11 + j ; k++ )
+	{
+		p = p->prox;
+	}
+	if (p->estado == VIVO)
+		return 1;
+	else
+		return 0;
+}
+
+void Mata_Alien(int i,int j,t_listaAlien *listaAlien)
+{
+	int k;
+	t_alien *p = listaAlien->ini->prox;
+	for ( k=0 ; k < i*11 + j ; k++ )
+	{
+		p = p->prox;
+	}
+	p->estado = MORRENDO;
+}
+
+int Verifica_Tiro(t_tiro *tiro,int linha_atual,int coluna_atual,t_listaAlien *listaAlien)
+{
+	if (tiro->lin == 1)
+	{
+		return 1;
+	}
+	else if ((tiro->lin < linha_atual+20) && (tiro->lin >= linha_atual))
 	{
 		if ((tiro->col >= coluna_atual)&&(tiro->col < coluna_atual+77))
 		{
-			if ( !(tiro->col - coluna_atual % 7 == 0 ))
+			if ( !(tiro->col - coluna_atual % 7 == 0 )||(tiro->col - coluna_atual - 1 % 7 == 0))
 			{
 				int i,j;
-				i = ( tiro->lin - linha_atual  ) / 5;
-				j = ( tiro->col - coluna_atual ) / 11;
-				if ( Verifica_Alien(i,j,lista_Alien) )
+				i = ( tiro->lin - linha_atual  ) / 4;
+				j = ( tiro->col - coluna_atual ) / 7;
+				if ( Verifica_Alien(i,j,listaAlien) )
 				{
-					Mata_Alien (i,j,lista_Alien) ;
+					Mata_Alien (i,j,listaAlien) ;
 					return 1;
 				}
 			}
 		}
 	}
-	else if (linha_tiro < linha_atual)
+	else if (tiro->lin < linha_atual)
 	{
 		/*adicionar teste da nave mãe*/
 	}
 	return 0;
 }
 
-void Atira (int linhaJogador,int colunaJogador,int *contTiros,t_tiro *vetorTiros)
+void Atira (int linhaJogador,int colunaJogador,int *contTiros,t_tiro **vetorTiros)
 {
-	vetorTiros[*contTiros]->lin = linhaJogador - 1;
-	vetorTiros[*contTiros]->col = colunaJogador + 3;
-	*contTiros++;
+	(vetorTiros[*contTiros])->lin = linhaJogador - 1;
+	(vetorTiros[*contTiros])->col = colunaJogador + 2;
+	*contTiros = *contTiros + 1;
 }
 
-void Organiza_Tiros (t_tiro *vetorTiros, int i);
+void Organiza_Tiros (t_tiro **vetorTiros, int i)
 {
 	int j;
 	for (j=i ; j<2 ; j++)
 	{
-		vetorTiros[j]->lin = vetor[j+1]->lin;
-		vetorTiros[j]->col = vetor[j+1]->col;
+		vetorTiros[j]->lin = vetorTiros[j+1]->lin;
+		vetorTiros[j]->col = vetorTiros[j+1]->col;
 	}
 	vetorTiros[j]->lin = 0;
 	vetorTiros[j]->col = 0;
 }
 
-void ImprimeTiros (t_tiro *vetorTiros, WINDOW *jogo)
+void ImprimeTiros (t_tiro **vetorTiros, WINDOW *jogo)
 {
 	int i;
 	for ( i=0 ; i<3 ; i++ )
@@ -222,7 +258,7 @@ void MoveJogador(int *atirou,int contTiros,int *colunaJogador,char key,int janel
 	{
 		if (contTiros < 3)
 		{
-			atirou = 1;
+			*atirou = 1;
 		}
 	}
 	else if(key == 'a')
@@ -256,10 +292,11 @@ int main ()
 	t_listaAlien listaAlien;					/*inicializa os aliens na lista*/
 	InicializaListaAliens (&listaAlien);
 
-	t_tiro *vetorTiros;
-	vetorTiros = (t_tiro *) malloc (3*sizeof(t_tiro));
+	t_tiro **vetorTiros;
+	vetorTiros = (t_tiro **) malloc (3*sizeof(t_tiro *));
 	for (i=0 ; i<3 ; i++)
 	{
+		vetorTiros[i] = (t_tiro *) malloc (sizeof(t_tiro));
 		vetorTiros[i]->lin = 0;
 		vetorTiros[i]->col = 0;
 	}
@@ -343,20 +380,23 @@ int main ()
 		
 		ImprimeTiros(vetorTiros,jogo);
 		
-		if (contTiros > 0)
+		if (indice % 1000 == 0)
 		{
-			for ( i=0 ; i<contTiros ; i++)
+			if (contTiros > 0)
 			{
-				if (Verifica_Tiro(vetorTiros[i],linhaAliens,colunaAliens))
+				for ( i=0 ; i<contTiros ; i++)
 				{
-					Organiza_Tiros(vetorTiros,i);
-					contTiros--;
-				}
-				else
-				{
-					vetorTiros[i]->lin--;
-				}
-			}	
+					if (Verifica_Tiro(vetorTiros[i],linhaAliens,colunaAliens,&listaAlien))
+					{
+						Organiza_Tiros(vetorTiros,i);
+						contTiros--;
+					}
+					else
+					{
+						vetorTiros[i]->lin--;
+					}
+				}	
+			}
 		}
 		
 		box(jogo,0,0);
