@@ -309,7 +309,7 @@ void LidaImpressaoAliens (WINDOW *jogo, int *colunaAliens, int *linhaAliens, int
 		else if (*colunaAliens+EspacoAliensC < janela_coluna-(janela_coluna/6))
 		{
 			ImprimeAliensPOSATUAL(listaAlien,*linhaAliens,*colunaAliens,vetorspritesA,jogo,intercalaS);
-			*colunaAliens = *colunaAliens - 1;
+			*colunaAliens = *colunaAliens + 1;
 		}
 	}
 }
@@ -372,8 +372,8 @@ int main ()
 		key = getch();
 		if (indice == 0)					/*quando os aliens se movem*/
 		{
-			/*LidaImpressaoAliens (jogo , &colunaAliens, &linhaAliens, janela_coluna, janela_linha, vetorspritesA, &intercalaS, &listaAlien,&indo);*/
-			wclear(jogo);
+			LidaImpressaoAliens (jogo , &colunaAliens, &linhaAliens, janela_coluna, janela_linha, vetorspritesA, &intercalaS, &listaAlien,&indo);
+			/*wclear(jogo);
 			if (indo)
 			{
 				if (colunaAliens+EspacoAliensC == janela_coluna-(janela_coluna/6))
@@ -387,8 +387,8 @@ int main ()
 				{
 					ImprimeAliensPOSATUAL(&listaAlien,linhaAliens,colunaAliens,vetorspritesA,jogo,&intercalaS);
 					colunaAliens++;
-				}
-			}
+				}					ate aqui lida com os aliens indo pra direita*/
+			/*}
 			else
 			{
                      		if (colunaAliens == 1)
@@ -403,7 +403,7 @@ int main ()
                        			ImprimeAliensPOSATUAL(&listaAlien,linhaAliens,colunaAliens,vetorspritesA,jogo,&intercalaS);
                       			colunaAliens--;
                        		}
-			}
+			}						*/								
 		}
 
                	MoveJogador(&atirou , contTiros , &colunaJogador , key , janela_coluna , &acabou);
