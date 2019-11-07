@@ -27,9 +27,8 @@
 #define EspacoAliensC 77	/* 7*11, onde 7 é o tamanho de coluna de cada alien e 11 é o número de aliens*/
 #define EspacoAliensL 20	/* 4*5, onde 4 é o tamanho de linha de cada alien e 5 é o número de aliens*/
 #define constTemp 40000
-#define constDivTela 6
 
-typedef struct t_alien		/*o tipo alien possui seu estado (VIVO, MORTO ou MORRENDO), sua posição e o proximo alien e o anterior*/
+typedef struct t_alien
 {
 	int estado;
 	int posi_l;
@@ -38,13 +37,13 @@ typedef struct t_alien		/*o tipo alien possui seu estado (VIVO, MORTO ou MORREND
 	struct t_alien *prev;
 } t_alien;
 
-typedef struct t_listaAlien	/*lista duplamente encadeada onde os nodos sao tipo alien*/
+typedef struct t_listaAlien
 {
 	t_alien *ini;
 	t_alien *fim;
 } t_listaAlien;
 
-typedef struct t_tiro		/*tipo tiro possui sua posição*/
+typedef struct t_tiro
 {
 	int lin;
 	int col;
@@ -52,16 +51,16 @@ typedef struct t_tiro		/*tipo tiro possui sua posição*/
 
 void InicializaSpritesAliens(char **vetors)	/*essa funcao inicaliza as sprites dos aliens em um vetor com esses sprites*/
 {
-	strcpy(vetors[0] ,sprite1i1);
-	strcpy(vetors[1] ,sprite1i2);
-	strcpy(vetors[2] ,sprite1i3);
-	strcpy(vetors[3] ,sprite1i1);
-	strcpy(vetors[4] ,sprite1i5);
-	strcpy(vetors[5] ,sprite1i3);
-	strcpy(vetors[6] ,sprite2i1);
-	strcpy(vetors[7] ,sprite2i2);
-	strcpy(vetors[8] ,sprite2i3);
-	strcpy(vetors[9] ,sprite2i1);
+	strcpy(vetors[0],sprite1i1);
+	strcpy(vetors[1],sprite1i2);
+	strcpy(vetors[2],sprite1i3);
+	strcpy(vetors[3],sprite1i1);
+	strcpy(vetors[4],sprite1i5);
+	strcpy(vetors[5],sprite1i3);
+	strcpy(vetors[6],sprite2i1);
+	strcpy(vetors[7],sprite2i2);
+	strcpy(vetors[8],sprite2i3);
+	strcpy(vetors[9],sprite2i1);
 	strcpy(vetors[10],sprite2i5);
 	strcpy(vetors[11],sprite2i6);
 	strcpy(vetors[12],sprite3i1);
@@ -75,7 +74,7 @@ void InicializaSpritesAliens(char **vetors)	/*essa funcao inicaliza as sprites d
 void insere_fim(t_listaAlien *l,int estado,int linha,int coluna)
 {
 	t_alien *new = (t_alien *) malloc (sizeof(t_alien));
-	if (! ( new == NULL ))					/*insere no fim para manter a ordem da lista*/
+	if (! ( new == NULL ))					/*insere no fiz para manter a ordem da lista*/
 	{
 		new->prox = l->fim;
 		new->prev = l->fim->prev;
@@ -129,8 +128,8 @@ void ImprimeAliensPOSATUAL(t_listaAlien *listaAlien,int linha,int coluna,char **
 	t_alien *p = listaAlien->ini->prox;
 	while (p->prox != NULL)
 	{
-		tipo = (p->posi_l + 1)/2;	/*essa conta serve para determinar o tipo de alien da linha, para saber qual sprite imprimir*/
-		if (*intercalaS == 1)		/*esse intercala serve para intercalar os sprites que os aliens ficam trocando*/
+		tipo = (p->posi_l + 1)/2;
+		if (*intercalaS == 1)
 		{
 			if (p->estado == VIVO)
 			{
@@ -158,7 +157,7 @@ void ImprimeAliensPOSATUAL(t_listaAlien *listaAlien,int linha,int coluna,char **
 		p = p->prox;
 	}
 	wrefresh(jogo);
-	*intercalaS = (*intercalaS + 1)%2;	/*altera o intercala para a proxima impressao*/
+	*intercalaS = (*intercalaS + 1)%2;
 }
 
 void ImprimeJogador(int linhaJogador,int colunaJogador,WINDOW *jogo)
@@ -171,11 +170,11 @@ int Verifica_Alien(int i,int j,t_listaAlien *listaAlien)
 {
 	int k;
 	t_alien *p = listaAlien->ini->prox;
-	for ( k=0 ; k < i*11 + j ; k++ )	/*esse for chega no alien requerido pela chamada da função*/
+	for ( k=0 ; k < i*11 + j ; k++ )
 	{
 		p = p->prox;
 	}
-	if (p->estado == VIVO)			/*se o alien requerido estiver vivo, ele retorna 0*/
+	if (p->estado == VIVO)
 		return 1;
 	else
 		return 0;
@@ -185,11 +184,11 @@ void Mata_Alien(int i,int j,t_listaAlien *listaAlien)
 {
 	int k;
 	t_alien *p = listaAlien->ini->prox;
-	for ( k=0 ; k < i*11 + j ; k++ )	/*chega no alien requerido*/
+	for ( k=0 ; k < i*11 + j ; k++ )
 	{
 		p = p->prox;
 	}
-	p->estado = MORRENDO;			/*machuca o alien requerido*/
+	p->estado = MORRENDO;
 }
 
 int Verifica_Tiro(t_tiro *tiro,int linha_atual,int coluna_atual,t_listaAlien *listaAlien)
@@ -198,18 +197,18 @@ int Verifica_Tiro(t_tiro *tiro,int linha_atual,int coluna_atual,t_listaAlien *li
 	{
 		return 1;
 	}
-	else if ((tiro->lin < linha_atual+20) && (tiro->lin >= linha_atual))					/*se tiver nas linhas dos aliens*/
+	else if ((tiro->lin < linha_atual+20) && (tiro->lin >= linha_atual))
 	{
-		if ((tiro->col >= coluna_atual)&&(tiro->col < coluna_atual+77))					/*se tiver na coluna dos aliens*/
+		if ((tiro->col >= coluna_atual)&&(tiro->col < coluna_atual+77))
 		{
-			if ( !(tiro->col - coluna_atual % 7 == 0 )||(tiro->col - coluna_atual  % 7 == 6))	/*se tiver nos aliens*/
+			if ( !(tiro->col - coluna_atual % 7 == 0 )||(tiro->col - coluna_atual - 1 % 7 == 0))
 			{
 				int i,j;
-				i = ( tiro->lin - linha_atual  ) / 4;						/*calcula qual aliens deve ser analisado*/
+				i = ( tiro->lin - linha_atual  ) / 4;
 				j = ( tiro->col - coluna_atual ) / 7;
-				if ( Verifica_Alien(i,j,listaAlien) )						/*vê se o alien ta vivo*/
+				if ( Verifica_Alien(i,j,listaAlien) )
 				{
-					Mata_Alien (i,j,listaAlien) ;						/*mata o alien*/
+					Mata_Alien (i,j,listaAlien) ;
 					return 1;
 				}
 			}
@@ -224,7 +223,7 @@ int Verifica_Tiro(t_tiro *tiro,int linha_atual,int coluna_atual,t_listaAlien *li
 
 void Atira (int linhaJogador,int colunaJogador,int *contTiros,t_tiro **vetorTiros)
 {
-	(vetorTiros[*contTiros])->lin = linhaJogador - 1;		/*adiciona um tiro com a determinada posicao no vetor de tiros*/
+	(vetorTiros[*contTiros])->lin = linhaJogador - 1;
 	(vetorTiros[*contTiros])->col = colunaJogador + 2;
 	*contTiros = *contTiros + 1;
 }
@@ -232,8 +231,8 @@ void Atira (int linhaJogador,int colunaJogador,int *contTiros,t_tiro **vetorTiro
 void Organiza_Tiros (t_tiro **vetorTiros, int i)
 {
 	int j;
-	for (j=i ; j<2 ; j++)						/*quando um tiro some, ou por que chegou em cima da tela, ou por que*/
-	{								/*acertou algo, a funcao tira o buraco que fica no vetor de tiros*/
+	for (j=i ; j<2 ; j++)
+	{
 		vetorTiros[j]->lin = vetorTiros[j+1]->lin;
 		vetorTiros[j]->col = vetorTiros[j+1]->col;
 	}
@@ -246,8 +245,8 @@ void ImprimeTiros (t_tiro **vetorTiros, WINDOW *jogo)
 	int i;
 	for ( i=0 ; i<3 ; i++ )
 	{
-		if (! ((vetorTiros[i]->lin == 0) && (vetorTiros[i]->col == 0)))			/*se o tiro existir, apaga o ele anterior e imprime ele na*/
-		{										/*posicao atual*/
+		if (! ((vetorTiros[i]->lin == 0) && (vetorTiros[i]->col == 0)))
+		{
 			mvwprintw(jogo , vetorTiros[i]->lin + 1 , vetorTiros[i]->col , " ");
 			mvwprintw(jogo , vetorTiros[i]->lin     , vetorTiros[i]->col , "|");
 		}
@@ -258,7 +257,7 @@ void MoveJogador(int *atirou,int contTiros,int *colunaJogador,char key,int janel
 {
 	if(key == ' ') 
 	{
-		if (contTiros < 3)	/*limite de tiros*/
+		if (contTiros < 3)
 		{
 			*atirou = 1;
 		}
@@ -270,114 +269,48 @@ void MoveJogador(int *atirou,int contTiros,int *colunaJogador,char key,int janel
   	}
 	else if (key == 'd') 
 	{
-		if (*colunaJogador + 6 < (janela_coluna - (janela_coluna/constDivTela)))
+		if (*colunaJogador + 6 < (janela_coluna - (janela_coluna/6)))
 		*colunaJogador = *colunaJogador + 1;
 	}
-	else if (key == 'q') 		/*sai do jogo*/
+	else if (key == 'q') 
 	{
 		*acabou = 1;
 		endwin();
 	}						
 }
 
-void LidaImpressaoAliens (WINDOW *jogo, int *colunaAliens, int *linhaAliens, int janela_coluna, int janela_linha, char **vetorspritesA, int *intercalaS, t_listaAlien *listaAlien, int *indo,int contColEsq,int contColDir)
+void LidaImpressaoAliens (WINDOW *jogo, int *colunaAliens, int *linhaAliens, int janela_coluna, int janela_linha, char **vetorspritesA, int *intercalaS, t_listaAlien *listaAlien, int *indo)
 {
 	wclear(jogo);
-	if (*indo)		/*se estiver indo pra direita*/
+	if (indo)
 	{
-		if (*colunaAliens+EspacoAliensC == janela_coluna-(janela_coluna/constDivTela) + 7*contColDir)	/*se estiver no canto direito*/
+		if (*colunaAliens+EspacoAliensC == janela_coluna-(janela_coluna/6))
 		{
 			*linhaAliens = *linhaAliens + 1;
 			ImprimeAliensPOSATUAL(listaAlien,*linhaAliens,*colunaAliens,vetorspritesA,jogo,intercalaS);
 			*colunaAliens = *colunaAliens - 1;
 			*indo = 0;
 		}
-		else if (*colunaAliens+EspacoAliensC < janela_coluna-(janela_coluna/constDivTela) + 7*contColDir)
+		else if (*colunaAliens+EspacoAliensC < janela_coluna-(janela_coluna/6))
 		{
 			ImprimeAliensPOSATUAL(listaAlien,*linhaAliens,*colunaAliens,vetorspritesA,jogo,intercalaS);
 			*colunaAliens = *colunaAliens + 1;
-		}
+		}					/*ate aqui lida com os aliens indo pra direita*/
 	}
-	else			/*se estiver indo pra esquerda*/
+	else
 	{
-		if (*colunaAliens == 1 - 7*contColEsq)		/*se estiver no canto esquerdo*/
+		if (*colunaAliens == 1)
 		{
 			*linhaAliens = *linhaAliens + 1;
 			ImprimeAliensPOSATUAL(listaAlien,*linhaAliens,*colunaAliens,vetorspritesA,jogo,intercalaS);
 			*colunaAliens = *colunaAliens + 1;
 			*indo = 1;
 		}
-		else if (*colunaAliens+EspacoAliensC < janela_coluna-(janela_coluna/constDivTela) + 7*contColDir)
+		else if (*colunaAliens+EspacoAliensC < janela_coluna-(janela_coluna/6))
 		{
 			ImprimeAliensPOSATUAL(listaAlien,*linhaAliens,*colunaAliens,vetorspritesA,jogo,intercalaS);
 			*colunaAliens = *colunaAliens - 1;
 		}
-	}
-}
-
-void VerificaColunas (int *contColDir, int *contColEsq, t_listaAlien *listaAliens)
-{
-	int i;
-	int j = 0;
-	int colMorta = 1;
-	t_alien *p;
-	if (*contColEsq < 11)
-	{
-		p = listaAliens->ini->prox;		/*verifica as coluna da esquerda*/
-		for ( i=0 ; i < *contColEsq ; i++ )
-		{
-			p = p->prox;
-		}
-		if (p->estado == VIVO)
-       		 	colMorta = 0;
-		while ((colMorta)&&(j<4))
-		{
-			for ( i=0 ; i<11 ; i++ )
-			{
-				p = p->prox;
-			}
-			if (p->estado == VIVO)
-               		 	colMorta = 0;
-			j++;
-		}
-		if (colMorta)
-			*contColEsq = *contColEsq + 1;
-	}
-	
-	if (*contColDir < 11)
-	{
-		p = listaAliens->ini->prox;			/*verifica as coluna da direita*/
-		colMorta = 1;
-		j = 0;
-		for (i=0 ; i < 10 - *contColDir ; i++ )
-		{
-			p = p->prox;
-		}
-		if (p->estado == VIVO)
-			colMorta = 0;
-		while ((colMorta)&&(j<4))
-		{
-			for ( i=0 ; i<11 ; i++ )
-			{
-				p = p->prox;
-			}
-			if (p->estado == VIVO)
-				colMorta = 0;
-			j++;
-		}
-		if (colMorta)
-			*contColDir = *contColDir + 1;
-	}
-}
-
-void ReviveAliens (t_listaAlien *listaAliens)
-{
-	int i;
-	t_alien *p = listaAliens->ini->prox;
-	for (i=0 ; i<55 ; i++)
-	{
-		p->estado = VIVO;
-		p = p->prox;
 	}
 }
 
@@ -402,7 +335,7 @@ int main ()
 		vetorTiros[i] = (t_tiro *) malloc (sizeof(t_tiro));
 		vetorTiros[i]->lin = 0;
 		vetorTiros[i]->col = 0;
-	}								/*inicializa o vetor de tiros*/
+	}
 
 	initscr();			/*coisa que tinha no moodle*/
 	noecho();
@@ -413,8 +346,8 @@ int main ()
 	int janela_linha,janela_coluna;
 	getmaxyx(stdscr , janela_linha , janela_coluna);
 
-	WINDOW *jogo = newwin (janela_linha , janela_coluna-(janela_coluna/constDivTela) , 0 , 0);
-	WINDOW *score = newwin(janela_linha , (janela_coluna/constDivTela) , 0 , janela_coluna-(janela_coluna/constDivTela));
+	WINDOW *jogo = newwin (janela_linha , janela_coluna-(janela_coluna/6) , 0 , 0);
+	WINDOW *score = newwin(janela_linha , (janela_coluna/6) , 0 , janela_coluna-(janela_coluna/6));
 	refresh();
 
 	box(score,0,0);
@@ -426,77 +359,89 @@ int main ()
 	int colunaAliens = 1;
 	int linhaJogador = janela_linha-3;
 	int colunaJogador = janela_coluna/2;
+	int intercalaS = 1;
+	int indo = 1;
+	int indice = 0;
+	int acabou = 0;
+	int atirou = 0;
+	int contTiros = 0;
+	char key ;
 
-	int intercalaS = 1;	/*intercala sprites*/
-	int indo = 1;		/*controla ida pra esquerda ou direita*/
-	int indice = 0;		/*indice do while*/
-	int acabou = 0;		/*controla se o jogo deve ser fechado*/
-	int atirou = 0;		/*controla se houve tiro*/
-	int contTiros = 0;	/*conta os tiros*/
-	int contColDir = 0;	/*conta colunas de aliens mortos na direita*/
-	int contColEsq = 0; 	/*conta colunas de aliens mortos na esquerda*/
-	int resetar = 0;	/*controla os resets do jogo*/
-	char key ;		/*guarda a tecla apertada pelo jogador*/
-
-	while (!acabou)
+	while (indice <= constTemp)
 	{
-		while ((indice <= constTemp)&&(! resetar))
+		key = getch();
+		if (indice == 0)					/*quando os aliens se movem*/
 		{
-			key = getch();
-			if (indice % 20000 == 0)					/*quando os aliens se movem*/
+			/*LidaImpressaoAliens (jogo , &colunaAliens, &linhaAliens, janela_coluna, janela_linha, vetorspritesA, &intercalaS, &listaAlien,&indo);*/
+			wclear(jogo);
+			if (indo)
 			{
-				LidaImpressaoAliens (jogo , &colunaAliens, &linhaAliens, janela_coluna, janela_linha, vetorspritesA, &intercalaS, &listaAlien,&indo,contColEsq,contColDir);
-			}
-	
-       	        	MoveJogador(&atirou , contTiros , &colunaJogador , key , janela_coluna , &acabou);
-			ImprimeJogador(linhaJogador , colunaJogador , jogo);
-			
-			if (atirou)
-			{
-				Atira(linhaJogador , colunaJogador , &contTiros , vetorTiros);
-				atirou = 0;
-			}
-			
-			ImprimeTiros(vetorTiros,jogo);
-			
-			if (indice % 4000 == 0)
-			{
-				if (contTiros > 0)
+				if (colunaAliens+EspacoAliensC == janela_coluna-(janela_coluna/6))
 				{
-					for ( i=0 ; i<contTiros ; i++)
-					{
-						if (Verifica_Tiro(vetorTiros[i],linhaAliens,colunaAliens,&listaAlien))
-						{
-							Organiza_Tiros(vetorTiros,i);
-							contTiros--;
-						}
-						else
-						{
-							vetorTiros[i]->lin--;
-						}
-					}	
+					linhaAliens++;
+					ImprimeAliensPOSATUAL(&listaAlien,linhaAliens,colunaAliens,vetorspritesA,jogo,&intercalaS);
+					colunaAliens--;
+					indo = 0;
+				}
+				else if (colunaAliens+EspacoAliensC < janela_coluna-(janela_coluna/6))
+				{
+					ImprimeAliensPOSATUAL(&listaAlien,linhaAliens,colunaAliens,vetorspritesA,jogo,&intercalaS);
+					colunaAliens++;
 				}
 			}
-	
-			VerificaColunas(&contColDir,&contColEsq,&listaAlien);
-	
-			box(jogo,0,0);
-			wrefresh(jogo);
-			indice++;
-			if (contColEsq + contColDir >= 11)
+			else
 			{
-				resetar = 1;
+                     		if (colunaAliens == 1)
+                      		{
+                      			linhaAliens++;
+                       			ImprimeAliensPOSATUAL(&listaAlien,linhaAliens,colunaAliens,vetorspritesA,jogo,&intercalaS);
+                       			colunaAliens++;
+                       			indo = 1;
+                       		}
+                       		else if (colunaAliens+EspacoAliensC < janela_coluna-(janela_coluna/6))
+                       		{
+                       			ImprimeAliensPOSATUAL(&listaAlien,linhaAliens,colunaAliens,vetorspritesA,jogo,&intercalaS);
+                      			colunaAliens--;
+                       		}
 			}
-			if ((indice == constTemp)&&(! acabou))
-				indice=0;
 		}
-		ReviveAliens(&listaAlien);
-		linhaAliens = 1;
-		colunaAliens = 1;
-		contColDir = 0;
-		contColEsq = 0;
-		resetar = 0;
+
+               	MoveJogador(&atirou , contTiros , &colunaJogador , key , janela_coluna , &acabou);
+		ImprimeJogador(linhaJogador , colunaJogador , jogo);
+		
+		if (atirou)
+		{
+			Atira(linhaJogador , colunaJogador , &contTiros , vetorTiros);
+			atirou = 0;
+		}
+		
+		ImprimeTiros(vetorTiros,jogo);
+		
+		if (indice % 1000 == 0)
+		{
+			if (contTiros > 0)
+			{
+				for ( i=0 ; i<contTiros ; i++)
+				{
+					if (Verifica_Tiro(vetorTiros[i],linhaAliens,colunaAliens,&listaAlien))
+					{
+						Organiza_Tiros(vetorTiros,i);
+						contTiros--;
+					}
+					else
+					{
+						vetorTiros[i]->lin--;
+					}
+				}	
+			}
+		}
+		
+		box(jogo,0,0);
+		wrefresh(jogo);
+		indice++;
+		if ((indice == constTemp)&&(! acabou))
+			indice=0;
 	}
-	endwin(	);
+	endwin();
 	return 0;
 }
