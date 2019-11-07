@@ -18,6 +18,13 @@
 #define sprite3i5 "|8o8|"
 #define sprite3i6 "\\/|\\/"
 
+#define spriteM11 "  /*\\  "
+#define spriteM21 "/*0-0*\\"
+#define spriteM31 "\\+x+x+/"
+#define spriteM11 "  /*\\  "
+#define spriteM21 "/*-o-*\\"
+#define spriteM31 "\\x+x+x/"
+
 #define spriteJ1 " _/V\\_ "
 #define spriteJ2 " >UwU< "
 
@@ -28,6 +35,7 @@
 #define EspacoAliensL 20	/* 4*5, onde 4 é o tamanho de linha de cada alien e 5 é o número de aliens*/
 #define constTemp 40000
 #define constDivTela 6
+#define constDivPer 1.05
 
 typedef struct t_alien		/*o tipo alien possui seu estado (VIVO, MORTO ou MORRENDO), sua posição e o proximo alien e o anterior*/
 {
@@ -280,7 +288,7 @@ void MoveJogador(int *atirou,int contTiros,int *colunaJogador,char key,int janel
 	}						
 }
 
-void LidaImpressaoAliens (WINDOW *jogo, int *colunaAliens, int *linhaAliens, int janela_coluna, int janela_linha, char **vetorspritesA, int *intercalaS, t_listaAlien *listaAlien, int *indo,int contColEsq,int contColDir)
+void LidaImpressaoAliens (WINDOW *jogo, int *colunaAliens, int *linhaAliens, int janela_coluna, int janela_linha, char **vetorspritesA, int *intercalaS, t_listaAlien *listaAlien, int *indo,int contColEsq,int contColDir,int *perAlAtual)
 {
 	wclear(jogo);
 	if (*indo)		/*se estiver indo pra direita*/
@@ -291,6 +299,7 @@ void LidaImpressaoAliens (WINDOW *jogo, int *colunaAliens, int *linhaAliens, int
 			ImprimeAliensPOSATUAL(listaAlien,*linhaAliens,*colunaAliens,vetorspritesA,jogo,intercalaS);
 			*colunaAliens = *colunaAliens - 1;
 			*indo = 0;
+			*perAlAtual = *perAlAtual / constDivPer;
 		}
 		else if (*colunaAliens+EspacoAliensC < janela_coluna-(janela_coluna/constDivTela) + 7*contColDir)
 		{
@@ -306,6 +315,7 @@ void LidaImpressaoAliens (WINDOW *jogo, int *colunaAliens, int *linhaAliens, int
 			ImprimeAliensPOSATUAL(listaAlien,*linhaAliens,*colunaAliens,vetorspritesA,jogo,intercalaS);
 			*colunaAliens = *colunaAliens + 1;
 			*indo = 1;
+			*perAlAtual = *perAlAtual / constDivPer;
 		}
 		else if (*colunaAliens+EspacoAliensC < janela_coluna-(janela_coluna/constDivTela) + 7*contColDir)
 		{
@@ -381,6 +391,17 @@ void ReviveAliens (t_listaAlien *listaAliens)
 	}
 }
 
+void DestroiTiros (t_tiro **vetorTiros,int *contTiros)
+{
+	int i;
+	for ( i=0 ; i<3 ; i++)
+	{
+		vetorTiros[i]->lin = 0;
+		vetorTiros[i]->col = 0;
+	}
+	*contTiros = 0;
+}
+
 int main ()
 {
 	char **vetorspritesA;
@@ -422,7 +443,7 @@ int main ()
 	wrefresh(jogo);
 	wrefresh(score);
 	
-	int linhaAliens = 1;
+	int linhaAliens = 7;
 	int colunaAliens = 1;
 	int linhaJogador = janela_linha-3;
 	int colunaJogador = janela_coluna/2;
@@ -436,6 +457,8 @@ int main ()
 	int contColDir = 0;	/*conta colunas de aliens mortos na direita*/
 	int contColEsq = 0; 	/*conta colunas de aliens mortos na esquerda*/
 	int resetar = 0;	/*controla os resets do jogo*/
+	int perAlAtual = 20000;	/*periodo atual para os alien se mecher*/
+	int perAlIni = 20000;	/*periodo inicial de cada reset para os alien se mecher*/
 	char key ;		/*guarda a tecla apertada pelo jogador*/
 
 	while (!acabou)
@@ -443,9 +466,9 @@ int main ()
 		while ((indice <= constTemp)&&(! resetar))
 		{
 			key = getch();
-			if (indice % 20000 == 0)					/*quando os aliens se movem*/
+			if (indice % perAlAtual == 0)					/*quando os aliens se movem*/
 			{
-				LidaImpressaoAliens (jogo , &colunaAliens, &linhaAliens, janela_coluna, janela_linha, vetorspritesA, &intercalaS, &listaAlien,&indo,contColEsq,contColDir);
+				LidaImpressaoAliens (jogo,&colunaAliens,&linhaAliens,janela_coluna,janela_linha,vetorspritesA,&intercalaS,&listaAlien,&indo,contColEsq,contColDir,&perAlAtual);
 			}
 	
        	        	MoveJogador(&atirou , contTiros , &colunaJogador , key , janela_coluna , &acabou);
@@ -477,6 +500,7 @@ int main ()
 					}	
 				}
 			}
+			
 	
 			VerificaColunas(&contColDir,&contColEsq,&listaAlien);
 	
@@ -490,8 +514,11 @@ int main ()
 			if ((indice == constTemp)&&(! acabou))
 				indice=0;
 		}
+		DestroiTiros(vetorTiros,&contTiros);
+		perAlIni = perAlIni / 1.5;
+		perAlAtual = perAlIni;
 		ReviveAliens(&listaAlien);
-		linhaAliens = 1;
+		linhaAliens = 5;
 		colunaAliens = 1;
 		contColDir = 0;
 		contColEsq = 0;
