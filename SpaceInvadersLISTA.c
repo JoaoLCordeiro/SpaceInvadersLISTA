@@ -66,6 +66,21 @@ typedef struct t_mae		/*tipo mae para a nave mae*/
 	int col;
 } t_mae;
 
+typedef struct t_bar
+{
+	int linha;
+	int coluna;
+	int **matriz;
+	struct t_bar *prox;
+	struct t_bar *prev;
+} t_bar;
+
+typedef struct t_listaBar
+{
+	t_bar *ini;
+	t_bar *fim;
+} t_listaBar;
+
 void InicializaSpritesAliens(char **vetors)	/*essa funcao inicaliza as sprites dos aliens em um vetor com esses sprites*/
 {
 	strcpy(vetors[0] ,sprite1i1);
@@ -88,7 +103,7 @@ void InicializaSpritesAliens(char **vetors)	/*essa funcao inicaliza as sprites d
 	strcpy(vetors[17],sprite3i6);
 }
 
-void Insere_Fim(t_listaAlien *l,int estado,int linha,int coluna)
+void Insere_Fim_Aliens(t_listaAlien *l,int estado,int linha,int coluna)
 {
 	t_alien *new = (t_alien *) malloc (sizeof(t_alien));
 	if (! ( new == NULL ))					/*insere no fim para manter a ordem da lista*/
@@ -102,9 +117,7 @@ void Insere_Fim(t_listaAlien *l,int estado,int linha,int coluna)
 		l->fim->prev = new;
 	}
 	else
-	{
 		free(new);
-	}
 }								
 
 void Inicializa_Lista_Aliens(t_listaAlien* listaAliens)	/*Inicializa a lista que contém os aliens*/
@@ -132,9 +145,67 @@ void Inicializa_Lista_Aliens(t_listaAlien* listaAliens)	/*Inicializa a lista que
 		for ( i=0 ; i<5 ; i++ )				/*insere os aliens com suas devidas posiçoes e estado VIVO na lista*/
 		{
 			for ( j=0 ; j<11 ; j++ )
+				Insere_Fim_Aliens(listaAliens,VIVO,i,j);
+		}
+	}
+}
+
+void Insere_Fim_Bar(t_listaBar *l,int janela_linha,int janela_coluna,int i)
+{
+	t_bar *new = (t_bar *) malloc (sizeof(t_bar));
+	if (! ( new == NULL ))	
+	{
+		new->prox = l->fim;
+		new->prev = l->fim->prev;;
+		l->fim->prev->prox = new;
+		l->fim->prev = new;
+
+		new->linha = janela_linha - 10;
+		new->coluna = ((janela_coluna)/5)*i;
+
+		new->matriz = (int **) malloc (4*sizeof(int *));
+		int j;
+		int k;
+		for (j=0 ; j<4 ; j++)
+		{
+			new->matriz[j] = (int *) malloc (5*sizeof(int));
+			for (k=0 ; k<5 ; k++)
 			{
-				Insere_Fim(listaAliens,VIVO,i,j);
-			}	
+				if (((j == 0) && ((k==0) || (k==4))) || ((j==3)&& ((k>0) && (k<4))))
+					new->matriz[j][k] = MORTO;
+				else
+					new->matriz[j][k] = VIVO;
+			}
+		}
+	}
+	else
+		free(new);
+}								
+
+void Inicializa_Lista_Bar(t_listaBar *listaBar,int janela_linha,int janela_coluna)
+{
+	t_bar *ini = (t_bar *) malloc (sizeof(t_bar));
+	t_bar *fim = (t_bar *) malloc (sizeof(t_bar));
+	
+	if ((ini == NULL) || (fim == NULL))
+	{
+		free(ini);
+		free(fim);
+	}
+	else
+	{
+		ini->prox = fim;
+		fim->prev = ini;
+
+		ini->prev = NULL;
+		fim->prox = NULL;
+
+		listaBar->ini = ini;
+		listaBar->fim = fim;
+		int i;
+		for ( i=1 ; i<5 ; i++)
+		{
+			Insere_Fim_Bar(listaBar,janela_linha,janela_coluna,i);
 		}
 	}
 }
@@ -188,9 +259,8 @@ int Verifica_Alien(int i,int j,t_listaAlien *listaAlien)
 	int k;
 	t_alien *p = listaAlien->ini->prox;
 	for ( k=0 ; k < i*11 + j ; k++ )	/*esse laço chega no alien requerido pela chamada da função*/
-	{
 		p = p->prox;
-	}
+
 	if (p->estado == VIVO)			/*se o alien requerido estiver vivo, ele retorna 1, se não, retorna 0*/
 		return 1;
 	else
@@ -202,18 +272,15 @@ void Mata_Alien(int i,int j,t_listaAlien *listaAlien)
 	int k;
 	t_alien *p = listaAlien->ini->prox;
 	for ( k=0 ; k < i*11 + j ; k++ )	/*chega no alien requerido*/
-	{
 		p = p->prox;
-	}
+
 	p->estado = MORRENDO;			/*machuca o alien requerido*/
 }
 
 int Verifica_Tiro(t_tiro *tiro,int linha_atual,int coluna_atual,t_listaAlien *listaAlien,t_mae *naveMae)	/*função que verifica se o tiro da nave vai fazer algo além de subir*/
 {
 	if (tiro->lin == 1)	/*se tiver chegado no topo*/
-	{
 		return 1;
-	}
 	else if ((tiro->lin < linha_atual+20) && (tiro->lin >= linha_atual))					/*se tiver nas linhas dos aliens*/
 	{
 		if ((tiro->col >= coluna_atual)&&(tiro->col < coluna_atual+77))					/*se tiver na coluna dos aliens*/
@@ -236,9 +303,7 @@ int Verifica_Tiro(t_tiro *tiro,int linha_atual,int coluna_atual,t_listaAlien *li
 		if ((tiro->lin < 5)&&(tiro->lin > 1))					/*se ele estiver nas linhas da nave mãe*/
 		{
 			if ((tiro->col > naveMae->col)&&(tiro->col < naveMae->col + 9))	/*se ele estiver nas colunas da nave mãe*/
-			{
 				naveMae->estado = MORRENDO;
-			}
 		}
 	}
 	return 0;
@@ -247,9 +312,7 @@ int Verifica_Tiro(t_tiro *tiro,int linha_atual,int coluna_atual,t_listaAlien *li
 int Verifica_Tiro_A(t_tiro *tiro,int janela_linha,int linhaJogador,int colunaJogador,int *acabou)	/*função que verifica se o tiro do alien vai fazer algo além de descer*/
 {
 	if (tiro->lin == janela_linha)		/*se chegar no fundo da tela*/
-	{
 		return 1;
-	}
 	else if ((tiro->lin < linhaJogador+2)&&(tiro->lin >= linhaJogador))		/*se estiver nas linhas do jogador*/
 	{
 		if ((tiro->col < colunaJogador+5)&&(tiro->col >= colunaJogador))	/*se estiver nas colunas do jogador*/
@@ -311,9 +374,7 @@ void Move_Jogador(int *atirou,int contTiros,int *colunaJogador,char key,int jane
 	if(key == ' ') 
 	{
 		if (contTiros < 3)	/*limite de tiros*/
-		{
 			*atirou = 1;
-		}
 	}
 	else if(key == 'a')
 	{
@@ -379,17 +440,15 @@ void Verifica_Colunas (int *contColDir, int *contColEsq, t_listaAlien *listaAlie
 	{
 		p = listaAliens->ini->prox;		/*verifica as coluna da esquerda*/
 		for ( i=0 ; i < *contColEsq ; i++ )
-		{
 			p = p->prox;
-		}
+
 		if (p->estado == VIVO)
        		 	colMorta = 0;
 		while ((colMorta)&&(j<4))
 		{
 			for ( i=0 ; i<11 ; i++ )
-			{
 				p = p->prox;
-			}
+
 			if (p->estado == VIVO)
                		 	colMorta = 0;
 			j++;
@@ -404,17 +463,15 @@ void Verifica_Colunas (int *contColDir, int *contColEsq, t_listaAlien *listaAlie
 		colMorta = 1;
 		j = 0;
 		for (i=0 ; i < 10 - *contColDir ; i++ )
-		{
 			p = p->prox;
-		}
+
 		if (p->estado == VIVO)
 			colMorta = 0;
 		while ((colMorta)&&(j<4))
 		{
 			for ( i=0 ; i<11 ; i++ )
-			{
 				p = p->prox;
-			}
+
 			if (p->estado == VIVO)
 				colMorta = 0;
 			j++;
@@ -477,9 +534,7 @@ void Alien_Atira(WINDOW *jogo,int *contTirosA,int random,int linhaAlien,int colu
 	t_alien *p = listaAlien->ini->prox;
 	int i;
 	for (i=0 ; i<random ; i++)
-	{
 		p = p->prox;
-	}
 	if (p->estado == VIVO)
 	{
 		int j;
@@ -504,11 +559,10 @@ void Administra_Tiros (int *contTiros,int *contTirosA,t_tiro **vetorTiros,t_tiro
         			*contTiros = *contTiros - 1;
         		}
         		else
-        		{
         			vetorTiros[i]->lin--;
-        		}
         	}	
         }
+
         if (*contTirosA > 0)
         {
         	for ( i=0 ; i<*contTirosA ; i++ )
@@ -519,12 +573,31 @@ void Administra_Tiros (int *contTiros,int *contTirosA,t_tiro **vetorTiros,t_tiro
         			*contTirosA = *contTirosA - 1;
         		}
         		else
-        		{
         			vetorTirosA[i]->lin++;
-        		}
         	}
         }													
 }
+
+void Imprime_Barreiras (t_listaBar *listaBar,WINDOW *jogo)
+{
+	t_bar *p = listaBar->ini->prox;
+	int i;
+	int j;
+	int k;
+	for (i=0 ; i<4 ; i++)
+	{
+		for (j=0 ; j<4 ; j++)
+		{
+			for (k=0 ; k<5 ; k++)
+			{
+				if (p->matriz[j][k])
+					mvwprintw(jogo, p->linha + j , p->coluna + k , "A");
+			}
+		}
+		p = p->prox;
+	}
+}
+
 
 int main ()
 {
@@ -532,9 +605,7 @@ int main ()
 	vetorspritesA = (char **) malloc (18*sizeof(char*));		/*aloca espaço pra um vetor de sprites de aliens e poe os sprites nele*/
 	int i;
 	for ( i=0 ; i<18 ; i++)
-	{
 		vetorspritesA[i] = (char *) malloc (6*sizeof(char));
-	}
 	InicializaSpritesAliens (vetorspritesA);
 
 	t_listaAlien listaAlien;					/*inicializa os aliens na lista*/
@@ -571,6 +642,9 @@ int main ()
 	
 	int janela_linha,janela_coluna;
 	getmaxyx(stdscr , janela_linha , janela_coluna);
+
+	t_listaBar listaBar;
+        Inicializa_Lista_Bar(&listaBar,janela_linha,janela_coluna-(janela_coluna/constDivTela));	/*inicializa uma lista com as barreiras*/
 
 	WINDOW *jogo = newwin (janela_linha , janela_coluna-(janela_coluna/constDivTela) , 0 , 0);
 	WINDOW *score = newwin(janela_linha , (janela_coluna/constDivTela) , 0 , janela_coluna-(janela_coluna/constDivTela));
@@ -620,8 +694,8 @@ int main ()
 				Administra_Impressao_Aliens (jogo,&colunaAliens,&linhaAliens,janela_coluna,janela_linha,vetorspritesA,&intercalaS,&listaAlien,&indo,contColEsq,contColDir,&perAlAtual);
 				if (! naveMae->estado)
 				{
-					random = rand()%100;
-					if (random > 98)
+					random = rand()%1000;
+					if (random > 995)
 					{
 						naveMae->estado = 1;
 						naveMae->col = 0;
@@ -648,6 +722,8 @@ int main ()
 				atirou = 0;
 			}
 			
+			
+			Imprime_Barreiras (&listaBar,jogo);
 			Imprime_Tiros(vetorTiros,jogo);
 			Imprime_TirosA(vetorTirosA,jogo);
 			
