@@ -27,6 +27,14 @@
 #define spriteM22 " /*-o-*\\"
 #define spriteM32 " \\x+x+x/"
 
+#define spriteEX1 "\\ | /"
+#define spriteEX2 "- 0 -"
+#define spriteEX3 "/ | \\"
+
+#define spriteEX4 " \\  |  /"
+#define spriteEX5 " -  0  -"
+#define spriteEX6 " /  |  \\"
+
 #define spriteJ1 " _/V\\_ "
 #define spriteJ2 " >UwU< "
 
@@ -82,7 +90,7 @@ typedef struct t_listaBar
 	t_bar *fim;
 } t_listaBar;
 
-void InicializaSpritesAliens(char **vetors)	/*essa funcao inicaliza as sprites dos aliens em um vetor com esses sprites*/
+void Inicializa_Sprites_Aliens(char **vetors)	/*essa funcao inicaliza as sprites dos aliens em um vetor com esses sprites*/
 {
 	strcpy(vetors[0] ,sprite1i1);
 	strcpy(vetors[1] ,sprite1i2);
@@ -238,9 +246,9 @@ void Imprime_Aliens_POS_ATUAL(t_listaAlien *listaAlien,int linha,int coluna,char
 		}
 		if (p->estado == MORRENDO)
 		{
-			mvwprintw(jogo , linha+4*p->posi_l   , coluna+7*p->posi_c , "\\ | /");
-	                mvwprintw(jogo , linha+4*p->posi_l+1 , coluna+7*p->posi_c , "- 0 -");
-                        mvwprintw(jogo , linha+4*p->posi_l+2 , coluna+7*p->posi_c , "/ | \\");
+			mvwprintw(jogo , linha+4*p->posi_l   , coluna+7*p->posi_c , spriteEX1);
+	                mvwprintw(jogo , linha+4*p->posi_l+1 , coluna+7*p->posi_c , spriteEX2);
+                        mvwprintw(jogo , linha+4*p->posi_l+2 , coluna+7*p->posi_c , spriteEX3);
 			p->estado = MORTO;
 		}
 		p = p->prox;
@@ -278,8 +286,30 @@ void Mata_Alien(int i,int j,t_listaAlien *listaAlien)
 	p->estado = MORRENDO;			/*machuca o alien requerido*/
 }
 
-int Verifica_Tiro(t_tiro *tiro,int linha_atual,int coluna_atual,t_listaAlien *listaAlien,t_mae *naveMae,t_listaBar *listaBar,int *score)	/*função que verifica se o tiro da nave vai fazer algo além de subir*/
+void Organiza_Tiros (t_tiro ***vetorTiros, int i,int tam)	/*função que organiza um vetor de tiros baseado em seu tamanho*/		
 {
+	int j;
+	for (j=i ; j<tam-1 ; j++)					/*quando um tiro some, ou por que chegou em cima da tela, ou por que*/
+	{								/*acertou algo, a funcao tira o buraco que fica no vetor de tiros*/
+		(*vetorTiros)[j]->lin = (*vetorTiros)[j+1]->lin;
+		(*vetorTiros)[j]->col = (*vetorTiros)[j+1]->col;
+	}
+	(*vetorTiros)[j]->lin = 0;
+	(*vetorTiros)[j]->col = 0;
+}
+
+int Verifica_Tiro(t_tiro *tiro,int linha_atual,int coluna_atual,t_listaAlien *listaAlien,t_mae *naveMae,t_listaBar *listaBar,int *score,t_tiro **vetorTirosA,int *contTirosA)	/*função que verifica se o tiro da nave vai fazer algo além de subir*/
+{
+	int i;
+	for (i=0 ; i<5 ; i++)
+	{
+		if (((tiro->lin == vetorTirosA[i]->lin + 1)||(tiro->lin == vetorTirosA[i]->lin))&&(tiro->col == vetorTirosA[i]->col))
+		{
+			Organiza_Tiros(&vetorTirosA,i,5);
+			*contTirosA = *contTirosA - 1;
+			return 1;	
+		}
+	}
 	if (tiro->lin == 1)	/*se tiver chegado no topo*/
 		return 1;
 	else if ((tiro->lin < linha_atual+20) && (tiro->lin >= linha_atual))					/*se tiver nas linhas dos aliens*/
@@ -288,7 +318,7 @@ int Verifica_Tiro(t_tiro *tiro,int linha_atual,int coluna_atual,t_listaAlien *li
 		{
 			if ( !(tiro->col - coluna_atual % 7 == 0 )||(tiro->col - coluna_atual  % 7 == 6))	/*se tiver nos aliens*/
 			{
-				int i,j;
+				int j;
 				i = ( tiro->lin - linha_atual  ) / 4;						/*calcula qual aliens deve ser analisado*/
 				j = ( tiro->col - coluna_atual ) / 7;
 				if ( Verifica_Alien(i,j,listaAlien) )						/*vê se o alien ta vivo*/
@@ -314,7 +344,6 @@ int Verifica_Tiro(t_tiro *tiro,int linha_atual,int coluna_atual,t_listaAlien *li
 	}
 	else if ((tiro->lin >= listaBar->ini->prox->linha)&&(tiro->lin <= listaBar->ini->prox->linha + 3))
 	{
-		int i;
 		t_bar *p;
 		p = listaBar->ini->prox;
 		for (i=0 ; i<4 ; i++)
@@ -373,18 +402,6 @@ void Atira (int linhaJogador,int colunaJogador,int *contTiros,t_tiro **vetorTiro
 	*contTiros = *contTiros + 1;
 }
 
-void Organiza_Tiros (t_tiro **vetorTiros, int i,int tam)	/*função que organiza um vetor de tiros baseado em seu tamanho*/
-{
-	int j;
-	for (j=i ; j<tam-1 ; j++)					/*quando um tiro some, ou por que chegou em cima da tela, ou por que*/
-	{								/*acertou algo, a funcao tira o buraco que fica no vetor de tiros*/
-		vetorTiros[j]->lin = vetorTiros[j+1]->lin;
-		vetorTiros[j]->col = vetorTiros[j+1]->col;
-	}
-	vetorTiros[j]->lin = 0;
-	vetorTiros[j]->col = 0;
-}
-
 void Imprime_Tiros (t_tiro **vetorTiros, WINDOW *jogo)		/*função que imprime os tiros do jogador*/
 {
 	int i;
@@ -411,7 +428,7 @@ void Imprime_TirosA (t_tiro **vetorTirosA, WINDOW *jogo)		/*função que imprime
 	}
 }
 
-void Move_Jogador(int *atirou,int contTiros,int *colunaJogador,char key,int janela_coluna,int *acabou)	/*função que move o jogador, verifica se ele quer atirar e se ele quer fechar o jogo*/
+void Move_Jogador(int *atirou,int contTiros,int *colunaJogador,char key,int janela_coluna,int *fechou)	/*função que move o jogador, verifica se ele quer atirar e se ele quer fechar o jogo*/
 {
 	if(key == ' ') 
 	{
@@ -430,7 +447,7 @@ void Move_Jogador(int *atirou,int contTiros,int *colunaJogador,char key,int jane
 	}
 	else if (key == 'q') 		/*sai do jogo*/
 	{
-		*acabou = 1;
+		*fechou = 1;
 		endwin();
 	}						
 }
@@ -564,9 +581,9 @@ void Imprime_Mae (t_mae *naveMae,int *intercalaS,WINDOW *jogo)		/*função que i
 	}
 	else if (naveMae->estado == MORRENDO)
 	{
-		mvwprintw(jogo,linhaMAE  ,naveMae->col," \\  |  /");
-	        mvwprintw(jogo,linhaMAE+1,naveMae->col," -  0  -");
-	        mvwprintw(jogo,linhaMAE+2,naveMae->col," /  |  \\");
+		mvwprintw(jogo,linhaMAE  ,naveMae->col, spriteEX4);
+	        mvwprintw(jogo,linhaMAE+1,naveMae->col, spriteEX5);
+	        mvwprintw(jogo,linhaMAE+2,naveMae->col, spriteEX6);
 		naveMae->estado = MORTO;
 	}
 }
@@ -595,9 +612,9 @@ void Administra_Tiros (int *contTiros,int *contTirosA,t_tiro **vetorTiros,t_tiro
         {
         	for ( i=0 ; i<*contTiros ; i++ )
         	{
-        		if (Verifica_Tiro(vetorTiros[i],linhaAliens,colunaAliens,listaAlien,naveMae,listaBar,score))
+        		if (Verifica_Tiro(vetorTiros[i],linhaAliens,colunaAliens,listaAlien,naveMae,listaBar,score,vetorTirosA,contTirosA))
         		{
-        			Organiza_Tiros(vetorTiros,i,3);
+        			Organiza_Tiros(&vetorTiros,i,3);
         			*contTiros = *contTiros - 1;
         		}
         		else
@@ -611,7 +628,7 @@ void Administra_Tiros (int *contTiros,int *contTirosA,t_tiro **vetorTiros,t_tiro
         	{
         		if (Verifica_Tiro_A(vetorTirosA[i],janela_linha,linhaJogador,colunaJogador,acabou,listaBar))
         		{
-        			Organiza_Tiros(vetorTirosA,i,5);
+        			Organiza_Tiros(&vetorTirosA,i,5);
         			*contTirosA = *contTirosA - 1;
         		}
         		else
@@ -640,6 +657,39 @@ void Imprime_Barreiras (t_listaBar *listaBar,WINDOW *jogo)
 	}
 }
 
+void Destroi_Linha_Bar(t_listaBar *listaBar, int linha,WINDOW *jogo)
+{
+	t_bar *p = listaBar->ini->prox;
+	int i,j;
+	for (i=0 ; i<4 ; i++)
+	{
+		for (j=0 ; j<5 ; j++)
+		{
+			p->matriz[linha][j] = MORTO;
+		}
+		p = p->prox;
+	}
+}
+
+void Verifica_Linha_Aliens(t_listaAlien *listaAliens,int *contLin)
+{
+	t_alien *p;
+	p = listaAliens->ini->prox;
+	int i;
+	int alienVivo = 0;
+	for (i=0 ; i< 44-(*contLin)*11 ; i++)
+		p = p->prox;
+	i = 0;
+	while ((i < 11)&&(! alienVivo))
+	{
+		if (p->estado == VIVO)
+			alienVivo = 1;
+		i = i + 1;
+		p = p->prox;
+	}
+	if (! alienVivo)
+		*contLin = *contLin + 1;
+}
 
 int main ()
 {
@@ -662,42 +712,45 @@ int main ()
 	noecho();
 	nodelay(stdscr, TRUE);	
 	keypad(stdscr, TRUE);
-	
-	t_listaBar listaBar;
-        Inicializa_Lista_Bar(&listaBar,janela_linha,janela_coluna-(janela_coluna/constDivTela));	/*inicializa uma lista com as barreiras*/
 
+	/* "função" que inicializa as estruturas*/	
+	t_listaBar listaBar;
 	char **vetorspritesA;
-        vetorspritesA = (char **) malloc (18*sizeof(char*));		/*aloca espaço pra um vetor de sprites de aliens e poe os sprites nele*/
+        t_listaAlien listaAlien;
+	t_mae *naveMae;
+        t_tiro **vetorTiros;
+        t_tiro **vetorTirosA;
+
+	Inicializa_Lista_Bar(&listaBar,janela_linha,janela_coluna-(janela_coluna/constDivTela));
+                                                                                                                                          
+        vetorspritesA = (char **) malloc (18*sizeof(char*));
         int i;
         for ( i=0 ; i<18 ; i++)
         	vetorspritesA[i] = (char *) malloc (6*sizeof(char));
-        InicializaSpritesAliens (vetorspritesA);
-                                                                                                                                                        
-        t_listaAlien listaAlien;					/*inicializa os aliens na lista*/
+        Inicializa_Sprites_Aliens (vetorspritesA);
+                                                                                                                                          
         Inicializa_Lista_Aliens (&listaAlien);
-                                                                                                                                                        
-        t_tiro **vetorTiros;
+                                                                                                                                          
         vetorTiros = (t_tiro **) malloc (3*sizeof(t_tiro *));
         for (i=0 ; i<3 ; i++)
         {
         	vetorTiros[i] = (t_tiro *) malloc (sizeof(t_tiro));
         	vetorTiros[i]->lin = 0;
         	vetorTiros[i]->col = 0;
-        }								/*inicializa o vetor de tiros*/
-                                                                                                                                                        
-        t_mae *naveMae;
+        }						
+                                                                                                                                          
         naveMae = (t_mae *) malloc (sizeof(t_mae));
         naveMae->estado = MORTO;
-        naveMae->col = 0;						/*inicializa nave mãe*/
-                                                                                                                                                        
-        t_tiro **vetorTirosA;
+        naveMae->col = 0;					
+                                                                                                                                          
         vetorTirosA = (t_tiro **) malloc (5*sizeof(t_tiro *));
         for (i=0 ; i<5 ; i++)
         {
         	vetorTirosA[i] = (t_tiro *) malloc (sizeof(t_tiro));
         	vetorTirosA[i]->lin = 0;
         	vetorTirosA[i]->col = 0;
-        }								/*inicializa vetor de tiros dos aliens*/					
+        } 
+	/*fim da "função" que inicializa as estruturas*/
 
 	WINDOW *jogo = newwin (janela_linha , janela_coluna-(janela_coluna/constDivTela) , 0 , 0);
 	WINDOW *score = newwin(janela_linha , (janela_coluna/constDivTela) , 0 , janela_coluna-(janela_coluna/constDivTela));
@@ -717,11 +770,13 @@ int main ()
 	int indo 	= 1;		/*controla ida pra esquerda ou direita*/
 	int indice 	= 0;		/*indice do while*/
 	int acabou 	= 0;		/*controla se o jogo deve ser fechado*/
+	int fechou	= 0;
 	int atirou 	= 0;		/*controla se houve tiro*/
 	int contTiros 	= 0;		/*conta os tiros do jogador*/
 	int contTirosA 	= 0;		/*conta os tiros dos aliens*/
 	int contColDir 	= 0;		/*conta colunas de aliens mortos na direita*/
 	int contColEsq 	= 0; 		/*conta colunas de aliens mortos na esquerda*/
+	int contLin 	= 0;		/*conta as linhas de aliens mortos em baixo*/
 	int resetar 	= 0;		/*controla os resets do jogo*/
 	int perAlAtual 	= 20000;	/*periodo atual para os alien se mecher*/
 	int perAlIni 	= 20000;	/*periodo inicial de cada reset para os alien se mecher*/
@@ -729,12 +784,12 @@ int main ()
 	int pontos	= 0;
 	int pontosA	= 0;
 
-	while (!acabou)
+	while ((!acabou)&&(!fechou))
 	{
 		imprime_score_e_arte(score,janela_coluna/6);			
                 mvwprintw(score, 8 , janela_coluna/12 - 4 , "%8d",pontos);
                 wrefresh(score);
-		while ((indice <= constTemp)&&(! resetar))
+		while ((indice <= constTemp)&&(! resetar)&&(!fechou))
 		{
 			key = getch();
 			if (indice % perAlAtual == 0)					/*quando os aliens se movem*/
@@ -770,8 +825,18 @@ int main ()
 						naveMae->estado = 0;
 			}
 	
-       	        	Move_Jogador(&atirou , contTiros , &colunaJogador , key , janela_coluna , &acabou);
+       	        	Move_Jogador(&atirou , contTiros , &colunaJogador , key , janela_coluna , &fechou);
 			Imprime_Jogador(linhaJogador , colunaJogador , jogo);
+			if (key == 'p')						
+			{
+				imprime_pausa (jogo,janela_linha,janela_coluna);
+				nodelay(stdscr, FALSE);
+				key = getch();
+				while (key != 'p')
+					key = getch();
+				wclear(jogo);
+				nodelay(stdscr, TRUE);
+			}
 			
 			if (atirou)
 			{
@@ -784,15 +849,26 @@ int main ()
 				mvwprintw(score, 8 , janela_coluna/12 - 4 , "%8d",pontos);
 				wrefresh(score);
 			}
+
+			if (linhaAliens + 18 - 4*contLin >= janela_linha - 10)
+			{
+				if (linhaAliens + 18 - 4*contLin < janela_linha - 6)
+					Destroi_Linha_Bar(&listaBar, (linhaAliens+18) - (janela_linha-10) - 4*contLin,jogo);
+				else
+				{
+					acabou = 1;
+				}				
+			}
 			
 			Imprime_Barreiras (&listaBar,jogo);
 			Imprime_Tiros(vetorTiros,jogo);
 			Imprime_TirosA(vetorTirosA,jogo);
 		
 			pontosA = pontos;	
-			if (indice % 16000 == 0)
+			if (indice % 12000 == 0)
 			{
 				Administra_Tiros (&contTiros,&contTirosA,vetorTiros,vetorTirosA,&listaAlien,naveMae,&acabou,colunaAliens,linhaAliens,colunaJogador,linhaJogador,janela_linha,&listaBar,&pontos);
+				Verifica_Linha_Aliens(&listaAlien,&contLin);
 			}
 	
 			Verifica_Colunas(&contColDir,&contColEsq,&listaAlien);
@@ -804,37 +880,52 @@ int main ()
 				resetar = 1;
 			if ((indice == constTemp)&&(! acabou))
 				indice  = 0;
-		}
+		} /*aqui acaba o while de cada rodada*/
 		naveMae->estado = MORTO;
 		naveMae->col    = 0;
 		perAlIni 	= perAlIni / 1.5;
 		perAlAtual 	= perAlIni;
 		linhaAliens 	= 5;
 		colunaAliens 	= 1;
+		contLin		= 0;
 		contColDir 	= 0;
 		contColEsq 	= 0;
 		resetar 	= 0;
 		Revive_Aliens(&listaAlien);
 		Destroi_Tiros(vetorTiros ,&contTiros ,3);
 		Destroi_Tiros(vetorTirosA,&contTirosA,5);
-		if (!acabou)
+		if ((!acabou)&&(!fechou))
 		{
 			wclear(jogo);
 			nodelay(stdscr, FALSE);
-			mvwprintw(jogo, janela_linha - 4, 5*(janela_coluna/6)/2 -10 ,"aperte qualquer tecla");
-			imprime_reset(jogo,janela_linha,janela_coluna);
-			key = getch();	
+			while (key != 's')
+			{
+				mvwprintw(jogo, janela_linha - 4, 5*(janela_coluna/6)/2 - 12 ,"Aperte s para continuar");
+				imprime_reset(jogo,janela_linha,janela_coluna);
+				key = getch();	
+			}
 		}
 		nodelay(stdscr, TRUE);
+	} /*aqui acaba o while do jogo*/
+	if (! fechou)
+	{
+		wclear(jogo);
+		nodelay(stdscr, FALSE);
+		while (key != 's')
+		{
+			mvwprintw(jogo, janela_linha - 4, 5*(janela_coluna/6)/2 - 10 ,"Aperte s para fechar");
+			imprime_morte(jogo,janela_linha,janela_coluna);
+			key = getch();
+		}
 	}
-}
+}	/*aqui acaba o segundo if*/
 	else if (key != 'q')
 	{
 		clear();
 		endwin(); 
 		printf("Erro: botao nao reconhecido :( \n"); 
 	}
-}
+}	/*aqui acaba o primeiro if*/
 	else
 		clear();
 		endwin(	);

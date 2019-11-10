@@ -74,6 +74,27 @@
 #define RESET23 "                    |__|   \\____/|___|  /\\____ |(____  /                         "
 #define RESET24 "                                      \\/      \\/     \\/                          "
 
+#define MORTE01 "________           .___                                                        "
+#define MORTE02 "\\_____  \\   ______ |   | _______  _______    _________________   ____   ______ "
+#define MORTE03 " /   |   \\ /  ___/ |   |/    \\  \\/ /\\__  \\  /  ___/  _ \\_  __ \\_/ __ \\ /  ___/ "
+#define MORTE04 "/    |    \\\\___ \\  |   |   |  \\   /  / __ \\_\\___ (  <_> )  | \\/\\  ___/ \\___ \\  "
+#define MORTE05 "\\_______  /____  > |___|___|  /\\_/  (____  /____  >____/|__|    \\___  >____  > "
+#define MORTE06 "        \\/     \\/           \\/           \\/     \\/                  \\/     \\/  "
+#define MORTE07 "         ____   ____                                                           "
+#define MORTE08 "         \\   \\ /   /____   ____   ____  ________________    _____              "
+#define MORTE09 "          \\   Y   // __ \\ /    \\_/ ___\\/ __ \\_  __ \\__  \\  /     \\             "
+#define MORTE10 "           \\     /\\  ___/|   |  \\  \\__\\  ___/|  | \\// __ \\|  Y Y  \\            "
+#define MORTE11 "            \\___/  \\___  >___|  /\\___  >___  >__|  (____  /__|_|  /            "
+#define MORTE12 "                       \\/     \\/     \\/    \\/           \\/      \\/             "
+
+#define PAUSA01 "* __________                               *"
+#define PAUSA02 "* \\______   \\_____   __ __  ___________    *"
+#define PAUSA03 "*  |     ___/\\__  \\ |  |  \\/  ___/\\__  \\   *"
+#define PAUSA04 "*  |    |     / __ \\|  |  /\\___ \\  / __ \\_ *"
+#define PAUSA05 "*  |____|    (____  /____//____  >(____  / *"
+#define PAUSA06 "*                 \\/           \\/      \\/  *"
+#define PAUSA07 "********************************************"
+
 void imprime_score_e_arte (WINDOW *score,int tam_col)
 {
         mvwprintw(score, 1, tam_col/2-11,SCORE1);
@@ -155,5 +176,39 @@ void imprime_reset (WINDOW *jogo,int janela_linha,int janela_coluna)
 	mvwprintw (jogo, posi_linha+21, posi_coluna,RESET22);
 	mvwprintw (jogo, posi_linha+22, posi_coluna,RESET23);
 	mvwprintw (jogo, posi_linha+23, posi_coluna,RESET24);
+	wrefresh(jogo);
+}
+
+void imprime_morte (WINDOW *jogo,int janela_linha,int janela_coluna)
+{
+	int posi_linha  = (janela_linha/2)-6;
+	int posi_coluna = 5*(janela_coluna/6)/2 - 40;
+	mvwprintw (jogo, posi_linha   , posi_coluna,MORTE01);
+	mvwprintw (jogo, posi_linha+1 , posi_coluna,MORTE02);
+	mvwprintw (jogo, posi_linha+2 , posi_coluna,MORTE03);
+	mvwprintw (jogo, posi_linha+3 , posi_coluna,MORTE04);
+	mvwprintw (jogo, posi_linha+4 , posi_coluna,MORTE05);
+	mvwprintw (jogo, posi_linha+5 , posi_coluna,MORTE06);
+	mvwprintw (jogo, posi_linha+6 , posi_coluna,MORTE07);
+	mvwprintw (jogo, posi_linha+7 , posi_coluna,MORTE08);
+	mvwprintw (jogo, posi_linha+8 , posi_coluna,MORTE09);
+	mvwprintw (jogo, posi_linha+9 , posi_coluna,MORTE10);
+        mvwprintw (jogo, posi_linha+10, posi_coluna,MORTE11);
+	mvwprintw (jogo, posi_linha+11, posi_coluna,MORTE12);
+	wrefresh(jogo);
+}
+
+void imprime_pausa (WINDOW *jogo,int janela_linha,int janela_coluna)
+{
+	int posi_linha  = janela_linha/2 - 4;
+	int posi_coluna = 5*(janela_coluna/6)/2 - 22;
+	mvwprintw (jogo, posi_linha   , posi_coluna,PAUSA07);
+        mvwprintw (jogo, posi_linha+1 , posi_coluna,PAUSA01);
+        mvwprintw (jogo, posi_linha+2 , posi_coluna,PAUSA02);
+        mvwprintw (jogo, posi_linha+3 , posi_coluna,PAUSA03);
+        mvwprintw (jogo, posi_linha+4 , posi_coluna,PAUSA04);
+        mvwprintw (jogo, posi_linha+5 , posi_coluna,PAUSA05);
+        mvwprintw (jogo, posi_linha+6 , posi_coluna,PAUSA06);
+        mvwprintw (jogo, posi_linha+7 , posi_coluna,PAUSA07);
 	wrefresh(jogo);
 }
