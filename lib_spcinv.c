@@ -1,4 +1,4 @@
-#include "lib_spvinv.h"
+#include "lib_spcinv.h"
 
 void Inicializa_Sprites_Aliens(char **vetors)	/*essa funcao inicaliza as sprites dos aliens em um vetor com esses sprites*/
 {
@@ -601,3 +601,48 @@ void Verifica_Linha_Aliens(t_listaAlien *listaAliens,int *contLin)
 		*contLin = *contLin + 1;
 }
 
+void Free_Listas(t_listaAlien *listaAlien,t_listaBar *listaBar)
+{
+	t_alien *p = listaAlien->ini->prox->prox;
+	int i;
+	for (i=0 ; i<55 ; i++)  /*free na lista de aliens*/
+	{
+		free(p->prev);
+		p = p->prox;
+	}
+	free (listaAlien->ini);
+	free (listaAlien->fim);
+	t_bar *q = listaBar->ini->prox->prox;
+	int j;
+	for (i=0 ; i<4 ; i++)   /*free na lista de barreiras*/
+	{
+		for (j=0 ; j<4 ; j++)
+		{
+			free(q->prev->matriz[j]);
+		}
+		free(q->prev);
+		q = q->prox;
+	}
+	free (listaBar->ini);
+	free (listaBar->fim);
+}
+
+void Revive_Bar (t_listaBar *listaBar)
+{
+	t_bar *p = listaBar->ini->prox;
+	int i,j,k;
+	for (i=0 ; i<4 ; i++)           /*passa por todas as barreiras*/
+	{
+		for (j=0 ; j<4 ; j++)       /*passa por todas as linhas de cada barreira*/
+		{
+			for (k=0 ; k<5 ; k++)   /*passa por todas as colunas de cada barreira*/
+			{
+				if (((j == 0) && ((k==0) || (k==4))) || ((j==3)&& ((k>0) && (k<4))))
+					p->matriz[j][k] = MORTO;
+				else
+					p->matriz[j][k] = VIVO;
+			}
+		}
+		p = p->prox;
+	}
+}

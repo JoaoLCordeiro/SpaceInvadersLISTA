@@ -169,3 +169,8 @@ void Verifica_Linha_Aliens(t_listaAlien *listaAliens,int *contLin);
 /*verifica se a atual última linha de aliens da "listaAliens" está inteiramente morta e, caso esteja, aumenta o contador de linhas "contLin"*/
 
 
+void Free_Listas (t_listaAlien *listaAlien,t_listaBar *listaBar);
+/*dá free nas listas "listaAlien" e "listaBar"*/
+
+void Revive_Bar (t_listaBar *listaBar);
+/*re-faz as barreiras. É chamada a cada rodada*/
