@@ -1,9 +1,5 @@
 #include "lib_bonito.h"
 
-/*#define SCORE1 " __   __   __   __   ___ "
-#define SCORE2 "/__` /  ` /  \\ |__) |__  "
-#define SCORE3 ".__/ \\__, \\__/ |  \\ |___ "*/
-
 #define SCORE1 " __                    "
 #define SCORE2 "/ _\\ ___ ___  _ __ ___ "
 #define SCORE3 "\\ \\ / __/ _ \\| '__/ _ \\"
@@ -95,6 +91,15 @@
 #define PAUSA06 "*                 \\/           \\/      \\/  *"
 #define PAUSA07 "********************************************"
 
+#define ALIEN01 "    ##          ##    "
+#define ALIEN02 "      ##      ##      "
+#define ALIEN03 "    ##############    "
+#define ALIEN04 "  ####  ######  ####  "
+#define ALIEN05 "######################"
+#define ALIEN06 "##  ##############  ##"
+#define ALIEN07 "##  ##          ##  ##"
+#define ALIEN08 "      ####  ####      "
+
 void imprime_score_e_arte (WINDOW *score,int tam_col)
 {
         mvwprintw(score, 1, tam_col/2-11,SCORE1);
@@ -102,6 +107,15 @@ void imprime_score_e_arte (WINDOW *score,int tam_col)
         mvwprintw(score, 3, tam_col/2-11,SCORE3);
         mvwprintw(score, 4, tam_col/2-11,SCORE4);
         mvwprintw(score, 5, tam_col/2-11,SCORE5);
+
+	mvwprintw(score, 15, tam_col/2-11,ALIEN01);
+	mvwprintw(score, 16, tam_col/2-11,ALIEN02);	
+	mvwprintw(score, 17, tam_col/2-11,ALIEN03);	
+	mvwprintw(score, 18, tam_col/2-11,ALIEN04);	
+	mvwprintw(score, 19, tam_col/2-11,ALIEN05);	
+	mvwprintw(score, 20, tam_col/2-11,ALIEN06);	
+	mvwprintw(score, 21, tam_col/2-11,ALIEN07);	
+	mvwprintw(score, 22, tam_col/2-11,ALIEN08);	
 }
 
 void imprime_menu (int janela_linha,int janela_coluna)
