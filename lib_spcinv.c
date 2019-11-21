@@ -560,7 +560,7 @@ void Imprime_Barreiras (t_listaBar *listaBar,WINDOW *jogo)
 			for (k=0 ; k<5 ; k++)   /*passa por todas as colunas de cada barreira*/
 			{
 				if (p->matriz[j][k])    /*se o pedaço da barreira estiver "VIVO"*/
-					mvwprintw(jogo, p->linha + j , p->coluna + k , "A");
+					mvwprintw(jogo, p->linha + j , p->coluna + k , "#");
 			}
 		}
 		p = p->prox;

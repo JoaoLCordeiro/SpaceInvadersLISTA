@@ -47,6 +47,7 @@
 #define constDivTela 6
 #define constDivPer 1.05
 #define linhaMAE 2
+#define perTiro 12000
 
 typedef struct t_alien		/*o tipo alien possui seu estado (VIVO, MORTO ou MORRENDO), sua posição e o proximo alien e o anterior*/
 {
